@@ -4,39 +4,26 @@ import com.example.application.data.AbstractEntity;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Item extends AbstractEntity {
 
     @NotEmpty
-    private int itemID;
-
-    @NotEmpty
     private String itemName = "";
 
-    @NotEmpty
-    private int listID;
-
-    @NotEmpty
+    @NotNull
     private double itemPrice;
 
-    @NotEmpty
-    private int itemQuantity;
+    @NotNull
+    private double itemQty;
 
-    public int getItemQuantity() {
-        return itemQuantity;
+    public double getItemQty() {
+        return itemQty;
     }
 
-    public void setItemQuantity(int itemQuantity) {
-        this.itemQuantity = itemQuantity;
-    }
-
-    public int getItemID() {
-        return itemID;
-    }
-
-    public void setItemID(int itemID) {
-        this.itemID = itemID;
+    public void setItemQty(double itemQty) {
+        this.itemQty = itemQty;
     }
 
     public String getItemName() {
@@ -45,14 +32,6 @@ public class Item extends AbstractEntity {
 
     public void setItemName(String itemName) {
         this.itemName = itemName;
-    }
-
-    public int getListID() {
-        return listID;
-    }
-
-    public void setListID(int listID) {
-        this.listID = listID;
     }
 
     public double getItemPrice() {

@@ -1,8 +1,8 @@
 package com.example.application.views.list;
 
 import com.example.application.data.entity.Item;
+import com.example.application.data.service.SpringService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,21 +17,36 @@ import com.vaadin.flow.router.Route;
 @Route(value = "", layout = MainLayout.class)
 public class ListView extends VerticalLayout {
 
+    private final SpringService service;
     Grid<Item> itemGrid = new Grid<>(Item.class);
-    ListForm form;
+    ItemForm form;
     TextField filterText = new TextField();
 
-    public ListView() {
+    public ListView(SpringService service) {
+        this.service = service;
         addClassName("list-view");
         setSizeFull();
 
         configureGrid();
         configureForm();
 
-        add(getToolbar(),
-            getContent());
+        add(
+            getToolbar(),
+            getContent()
+        );
 
+        updateList();
         closeEditor();
+    }
+
+    private void closeEditor() {
+        form.setItem(null);
+        form.setVisible(false);
+        removeClassName("editing");
+    }
+
+    private void updateList() {
+        itemGrid.setItems(service.findAllItems(filterText.getValue()));
     }
 
     private Component getContent() {
@@ -44,11 +59,26 @@ public class ListView extends VerticalLayout {
         return content;
     }
 
+    private void configureForm() {
+        form = new ItemForm();
+        form.setWidth("25em");
+
+        form.addListener(ItemForm.SaveEvent.class, this::saveItem);
+        form.addListener(ItemForm.DeleteEvent.class, this::deleteItem);
+        form.addListener(ItemForm.CloseEvent.class, e -> closeEditor());
+    }
+
+    private void saveItem(ItemForm.SaveEvent event) {
+        service.saveItem(event.getItem());
+        updateList();
+        closeEditor();
+    }
+
     private Component getToolbar() {
         filterText.setPlaceholder("Filter by name");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.EAGER);
-        // filterText.addValueChangeListener(e -> updateList());
+        filterText.addValueChangeListener(e -> updateList());
 
         Button addContactButton = new Button("Add item");
         addContactButton.addClickListener(e -> addItem());
@@ -67,27 +97,16 @@ public class ListView extends VerticalLayout {
     private void configureGrid() {
         itemGrid.addClassName("item-grid");
         itemGrid.setSizeFull();
-        itemGrid.setColumns("listID", "itemID", "itemName", "itemPrice", "itemQuantity");
+        itemGrid.setColumns("itemName", "itemPrice", "itemQty");
         itemGrid.getColumns().forEach(col -> col.setAutoWidth(true));
 
         // to set up form first before implementing
         itemGrid.asSingleSelect().addValueChangeListener(e -> editItem(e.getValue()));
     }
 
-    private void configureForm() {
-        form = new ListForm();
-        form.setWidth("25em");
-
-        form.addListener(ListForm.SaveEvent.class, this::saveContact);
-        form.addListener(ListForm.DeleteEvent.class, this::deleteContact);
-        form.addListener(ListForm.CloseEvent.class, e -> closeEditor());
-    }
-
-    private void saveContact(ListForm.SaveEvent event) {
-        closeEditor();
-    }
-
-    private void deleteContact(ListForm.DeleteEvent event) {
+    private void deleteItem(ItemForm.DeleteEvent event) {
+        service.deleteItem(event.getItem());
+        updateList();
         closeEditor();
     }
 
@@ -99,12 +118,6 @@ public class ListView extends VerticalLayout {
             form.setVisible(true);
             addClassName("editing");
         }
-    }
-
-    private void closeEditor() {
-        form.setItem(null);
-        form.setVisible(false);
-        removeClassName("editing");
     }
 
 }

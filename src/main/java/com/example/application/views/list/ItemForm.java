@@ -8,18 +8,19 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
 
-public class ListForm extends FormLayout {
+public class ItemForm extends FormLayout {
     Binder<Item> binder = new BeanValidationBinder<>(Item.class);
 
     TextField itemName = new TextField("Item name");
-    TextField itemPrice = new TextField("Item price");
-    TextField itemQty = new TextField("Item quantity");
+    NumberField itemPrice = new NumberField("Item price");
+    NumberField itemQty = new NumberField("Item quantity");
 
     Button save = new Button("Save");
     Button delete = new Button("Delete");
@@ -27,18 +28,19 @@ public class ListForm extends FormLayout {
 
     private Item item;
 
-    public ListForm() {
-        addClassName("list-form");
+    public ItemForm() {
+        addClassName("item-form");
+        binder.bindInstanceFields(this);
 
         add(itemName,
-                itemPrice,
-                itemQty,
-                createButtonsLayout());
+            itemPrice,
+            itemQty,
+            createButtonsLayout());
     }
 
     public void setItem(Item item) {
         this.item = item;
-        // binder.readBean(item);
+        binder.readBean(item);
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -61,39 +63,40 @@ public class ListForm extends FormLayout {
             binder.writeBean(item);
             fireEvent(new SaveEvent(this,item));
         } catch (ValidationException e) {
+            e.getMessage();
             e.printStackTrace();
         }
     }
 
     // Events
-    public static abstract class ContactFormEvent extends ComponentEvent<ListForm> {
+    public static abstract class ItemFormEvent extends ComponentEvent<ItemForm> {
         private Item item;
 
-        protected ContactFormEvent(ListForm source, Item item) {
+        protected ItemFormEvent(ItemForm source, Item item) {
             super(source, false);
             this.item = item;
         }
 
-        public Item getContact() {
+        public Item getItem() {
             return item;
         }
     }
 
-    public static class SaveEvent extends ContactFormEvent {
-        SaveEvent(ListForm source, Item item) {
+    public static class SaveEvent extends ItemFormEvent {
+        SaveEvent(ItemForm source, Item item) {
             super(source, item);
         }
     }
 
-    public static class DeleteEvent extends ContactFormEvent {
-        DeleteEvent(ListForm source, Item item) {
+    public static class DeleteEvent extends ItemFormEvent {
+        DeleteEvent(ItemForm source, Item item) {
             super(source, item);
         }
 
     }
 
-    public static class CloseEvent extends ContactFormEvent {
-        CloseEvent(ListForm source) {
+    public static class CloseEvent extends ItemFormEvent {
+        CloseEvent(ItemForm source) {
             super(source, null);
         }
     }
