@@ -2,6 +2,7 @@ package com.example.application.views.list;
 
 import com.example.application.data.entity.Item;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -77,7 +78,17 @@ public class ListView extends VerticalLayout {
         form = new ListForm();
         form.setWidth("25em");
 
+        form.addListener(ListForm.SaveEvent.class, this::saveContact);
+        form.addListener(ListForm.DeleteEvent.class, this::deleteContact);
+        form.addListener(ListForm.CloseEvent.class, e -> closeEditor());
+    }
 
+    private void saveContact(ListForm.SaveEvent event) {
+        closeEditor();
+    }
+
+    private void deleteContact(ListForm.DeleteEvent event) {
+        closeEditor();
     }
 
     private void editItem(Item item) {

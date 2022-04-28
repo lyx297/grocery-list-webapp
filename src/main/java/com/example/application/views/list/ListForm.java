@@ -1,47 +1,105 @@
 package com.example.application.views.list;
 
 import com.example.application.data.entity.Item;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.shared.Registration;
 
 public class ListForm extends FormLayout {
-    TextField firstName = new TextField("First name");
-    TextField lastName = new TextField("Last name");
-    EmailField email = new EmailField("Email");
+    Binder<Item> binder = new BeanValidationBinder<>(Item.class);
+
+    TextField itemName = new TextField("Item name");
+    TextField itemPrice = new TextField("Item price");
+    TextField itemQty = new TextField("Item quantity");
 
     Button save = new Button("Save");
     Button delete = new Button("Delete");
-    Button close = new Button("Cancel");
+    Button cancel = new Button("Cancel");
 
     private Item item;
 
     public ListForm() {
         addClassName("list-form");
 
-        add(firstName,
-                lastName,
-                email,
+        add(itemName,
+                itemPrice,
+                itemQty,
                 createButtonsLayout());
     }
 
     public void setItem(Item item) {
         this.item = item;
-        // binder.readBean(contact);
+        // binder.readBean(item);
     }
 
     private HorizontalLayout createButtonsLayout() {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        save.addClickListener(event -> validateAndSave());
+        delete.addClickListener(event -> fireEvent(new DeleteEvent(this, item)));
+        cancel.addClickListener(event -> fireEvent(new CloseEvent(this)));
 
         save.addClickShortcut(Key.ENTER);
-        close.addClickShortcut(Key.ESCAPE);
+        cancel.addClickShortcut(Key.ESCAPE);
 
-        return new HorizontalLayout(save, delete, close);
+        return new HorizontalLayout(save, delete, cancel);
+    }
+
+    private void validateAndSave() {
+        try {
+            binder.writeBean(item);
+            fireEvent(new SaveEvent(this,item));
+        } catch (ValidationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Events
+    public static abstract class ContactFormEvent extends ComponentEvent<ListForm> {
+        private Item item;
+
+        protected ContactFormEvent(ListForm source, Item item) {
+            super(source, false);
+            this.item = item;
+        }
+
+        public Item getContact() {
+            return item;
+        }
+    }
+
+    public static class SaveEvent extends ContactFormEvent {
+        SaveEvent(ListForm source, Item item) {
+            super(source, item);
+        }
+    }
+
+    public static class DeleteEvent extends ContactFormEvent {
+        DeleteEvent(ListForm source, Item item) {
+            super(source, item);
+        }
+
+    }
+
+    public static class CloseEvent extends ContactFormEvent {
+        CloseEvent(ListForm source) {
+            super(source, null);
+        }
+    }
+
+    public <T extends ComponentEvent<?>> Registration addListener(Class<T> eventType,
+                                                                  ComponentEventListener<T> listener) {
+        return getEventBus().addListener(eventType, listener);
     }
 }
