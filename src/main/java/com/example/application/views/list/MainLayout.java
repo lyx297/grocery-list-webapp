@@ -30,13 +30,14 @@ public class MainLayout extends AppLayout {
     }
 
     private void createDrawer() {
-        RouterLink itemView = new RouterLink("List", ListView.class);
+        RouterLink itemView = new RouterLink("Items", MainPage.class);
         itemView.setHighlightCondition(HighlightConditions.sameLocation());
 
-
         addToDrawer(new VerticalLayout(
+                new RouterLink("Edit grocery lists", GroceryListPage.class),
                 itemView
         ));
+
 
     }
 }

@@ -1,34 +1,43 @@
 package com.example.application.data.service;
 
+import com.example.application.data.entity.GroceryListInfo;
 import com.example.application.data.entity.Item;
-import com.example.application.data.entity.ListInfo;
 import com.example.application.data.repository.ItemRepository;
-import com.example.application.data.repository.ListInfoRepository;
+import com.example.application.data.repository.GroceryListInfoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpringService {
 
-    private final ItemRepository itemRepository;
-    private final ListInfoRepository listInfoRepository;
+    final ItemRepository itemRepository;
+    final GroceryListInfoRepository groceryListInfoRepository;
 
     public SpringService(ItemRepository itemRepository,
-                        ListInfoRepository listInfoRepository
+                        GroceryListInfoRepository groceryListInfoRepository
     ) {
         this.itemRepository = itemRepository;
-        this.listInfoRepository = listInfoRepository;
+        this.groceryListInfoRepository = groceryListInfoRepository;
     }
 
     public List<Item> findAllItems(String stringFilter) {
         if (stringFilter == null || stringFilter.isEmpty()) {
             return itemRepository.findAll();
         } else {
-            return itemRepository.search(stringFilter);
+            return itemRepository.searchBasedOnItemName(stringFilter);
         }
+    }
+
+
+
+    public List<GroceryListInfo> findAllListInfo(String stringFilter) {
+        if (stringFilter == null || stringFilter.isEmpty()) {
+            return groceryListInfoRepository.findAll();
+        } else {
+            return groceryListInfoRepository.search(stringFilter);
+        }
+
     }
 
     public long countItems() {
@@ -47,24 +56,25 @@ public class SpringService {
         itemRepository.save(item);
     }
 
-    public List<ListInfo> findAllListInfo() {
-        return listInfoRepository.findAll();
+    public List<GroceryListInfo> findAllListInfo() {
+        return groceryListInfoRepository.findAll();
     }
+
 
     public long countListInfo() {
-        return listInfoRepository.count();
+        return groceryListInfoRepository.count();
     }
 
-    public void deleteListInfo(ListInfo listInfo) {
-        listInfoRepository.delete(listInfo);
+    public void deleteListInfo(GroceryListInfo groceryListInfo) {
+        groceryListInfoRepository.delete(groceryListInfo);
     }
 
-    public void saveListInfo(ListInfo listInfo) {
-        if(listInfo == null) {
+    public void saveListInfo(GroceryListInfo groceryListInfo) {
+        if(groceryListInfo == null) {
             System.err.println("Item is null.");
             return;
         }
-        listInfoRepository.save(listInfo);
+        groceryListInfoRepository.save(groceryListInfo);
     }
 
 
